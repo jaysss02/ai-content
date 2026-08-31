@@ -1,0 +1,4 @@
+anthropic>=0.75.0
+pydantic>=2.0
+flask>=3.0
+pytest>=8.0

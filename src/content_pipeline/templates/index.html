@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Content Pipeline</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 16px; color: #1a1a1a; }
+  h1 { margin-bottom: 4px; }
+  .subtitle { color: #666; margin-top: 0; }
+  fieldset { border: 1px solid #ddd; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
+  label { display: block; font-weight: 600; margin-top: 12px; margin-bottom: 4px; }
+  input[type=text], textarea { width: 100%; box-sizing: border-box; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+  textarea { min-height: 90px; }
+  button { margin-top: 16px; padding: 10px 20px; font-size: 14px; background: #1a1a1a; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+  button:hover { background: #333; }
+  .banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+  .banner.demo { background: #fff8e1; color: #8a6d00; }
+  .banner.error { background: #fdecea; color: #a83232; }
+  .channel { border: 1px solid #ddd; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; }
+  .channel h3 { margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .channel pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
+  .quality { margin-top: 12px; font-size: 13px; color: #444; border-top: 1px solid #eee; padding-top: 10px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .badge.pass { background: #e6f4ea; color: #1e7a34; }
+  .badge.review { background: #fdecea; color: #a83232; }
+  .saved { font-size: 13px; color: #666; margin-top: 24px; }
+</style>
+</head>
+<body>
+  <h1>Content Pipeline</h1>
+  <p class="subtitle">Turn a brief into blog, Instagram, and newsletter content.</p>
+
+  {% if demo_mode %}
+  <div class="banner demo">Running in DEMO MODE (no ANTHROPIC_API_KEY set) — showing canned content.</div>
+  {% endif %}
+  {% if error %}
+  <div class="banner error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post">
+    <fieldset>
+      <label for="topic">Topic</label>
+      <input type="text" id="topic" name="topic" value="{{ form.get('topic', '') }}" required>
+
+      <label for="audience">Target audience</label>
+      <input type="text" id="audience" name="audience" value="{{ form.get('audience', '') }}" required>
+
+      <label for="tone">Tone</label>
+      <input type="text" id="tone" name="tone" value="{{ form.get('tone', '') }}" required>
+
+      <label for="key_points">Key points (one per line)</label>
+      <textarea id="key_points" name="key_points" required>{{ form.get('key_points', '') }}</textarea>
+
+      <button type="submit">Generate content</button>
+    </fieldset>
+  </form>
+
+  {% if channels %}
+    {% for c in channels %}
+    <div class="channel">
+      <h3>
+        {{ c.name }}
+        <span class="badge {{ 'pass' if c.passed else 'review' }}">{{ 'PASS' if c.passed else 'REVIEW' }}</span>
+      </h3>
+      <pre>{{ c.content }}</pre>
+      <div class="quality">{{ c.check.notes }}</div>
+    </div>
+    {% endfor %}
+
+    {% if saved_path %}
+    <p class="saved">Saved to {{ saved_path }}</p>
+    {% endif %}
+  {% endif %}
+</body>
+</html>
